@@ -41,6 +41,7 @@ sia = SentimentIntensityAnalyzer()
 for idx, row in tqdm(df_test.iterrows(), total=df_test.shape[0]):
     # Tokenize sentence using spaCy
     sentence = nlp(row.Sentence)
+
     # Get polarity score from vader
     scores = sia.polarity_scores(sentence.text)
 
