@@ -12,56 +12,9 @@ Submission to Question 2, Part 1
 
 import pandas as pd
 import numpy as np
-import re
-import unidecode
-import spacy
-from spacy.lang.en.stop_words import STOP_WORDS
-import string
-import matplotlib.pyplot as plt
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-from sklearn.base import TransformerMixin
-from sklearn.pipeline import Pipeline
 from sklearn.metrics import f1_score, accuracy_score
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.neural_network import MLPClassifier
-from sklearn.model_selection import GridSearchCV
-from tqdm import tqdm
 import autokeras as ak
-from tensorflow.keras.models import load_model, save_model
-from tensorflow.keras.utils import plot_model
-
-# import spaCy tokenizer (downloaded using $ python -m spacy download en_core_web_sm)
-nlp = spacy.load('en_core_web_sm')
-punctuation = string.punctuation
-custom_punctuation = ['', '..', '...', '....', '.....', '......']
-
-
-def spacy_tokenizer(sentence):
-    """
-    Tokenizer and pre-processing using spaCy
-    :param sentence: input sentence
-    :type sentence: string
-    :return:
-    """
-
-    # Remove digits
-    sentence = re.sub(r'\d+', '', sentence)
-
-    # Remove unicode characters
-    sentence = unidecode.unidecode(sentence)
-
-    # Tokenize sentence using spaCy
-    tokens = nlp(sentence)
-
-    # Remove punctuation
-    tokens = [word for word in tokens if word.text not in punctuation and word.text not in custom_punctuation]
-
-    # Lemmatize tokens
-    tokens = [word.lemma_.lower().strip() if word.lemma_ != '-PRON-' else word.lower_ for word in tokens]
-
-    return ' '.join(tokens)
-
+from utils_tokenizer import spacy_tokenizer_string
 
 # Load Training data
 df_train = pd.read_csv("data/sentiment_train.csv")
@@ -81,8 +34,8 @@ y_test = df_test['Polarity']
 classifier = ak.TextClassifier(max_trials=30, seed=42)
 
 # Clean up sentence data using custom tokenizer, convert datatypes for autokeras
-X_train_clean = np.array(X_train.apply(spacy_tokenizer), dtype=np.str)
-X_test_clean = np.array(X_test.apply(spacy_tokenizer), dtype=np.str)
+X_train_clean = np.array(X_train.apply(spacy_tokenizer_string), dtype=np.str)
+X_test_clean = np.array(X_test.apply(spacy_tokenizer_string), dtype=np.str)
 
 # Convert datatypes for compatibility with autokeras
 y_train_clean = np.array(y_train)
