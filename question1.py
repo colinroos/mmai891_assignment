@@ -17,14 +17,19 @@ import matplotlib.pyplot as plt
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from sklearn.metrics import f1_score, accuracy_score
 from tqdm import tqdm
+from utils_tokenizer import spacy_tokenizer
 
+# Load training data
 df_train = pd.read_csv("data/sentiment_train.csv")
 
+# Separate labels from features
 print(df_train.info())
 print(df_train.head())
 
+# Load testing data
 df_test = pd.read_csv("data/sentiment_test.csv")
 
+# Separate labels from features
 print(df_test.info())
 print(df_test.head())
 
@@ -34,16 +39,16 @@ df_test['Pred'] = 0
 # import spaCy tokenizer (downloaded using $ python -m spacy download en_core_web_sm)
 nlp = spacy.load('en_core_web_sm')
 
-# initialize vader (lexicon files downloaded using nltk.download())
+# initialize vader (lexicon files downloaded using nltk.download('vader_lexicon))
 sia = SentimentIntensityAnalyzer()
 
 # Calculate sentiment for each sentence in test set
 for idx, row in tqdm(df_test.iterrows(), total=df_test.shape[0]):
     # Tokenize sentence using spaCy
-    sentence = nlp(row.Sentence)
+    tokens = spacy_tokenizer(row['Sentence'])
 
     # Get polarity score from vader
-    scores = sia.polarity_scores(sentence.text)
+    scores = sia.polarity_scores(' '.join(tokens))
 
     # Add sentence sentiment to DataFrame
     df_test.iloc[idx, 2] = scores['compound']
@@ -66,7 +71,7 @@ for threshold in thresholds:
 df_test.loc[df_test['Pred'] >= 0, 'Pred_polarity'] = 1
 df_test.loc[df_test['Pred'] < 0, 'Pred_polarity'] = 0
 
-print(df_test[df_test['Polarity'] != df_test['Pred_polarity']].head(5))
+df_test[df_test['Polarity'] != df_test['Pred_polarity']].to_csv('incorrect_classification_q1.csv')
 
 # Print f1 score for a threshold of 0
 f1 = f1_score(df_test['Polarity'], df_test['Pred_polarity'])

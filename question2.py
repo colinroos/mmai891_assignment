@@ -12,34 +12,16 @@ Submission to Question 2, Part 1
 
 import pandas as pd
 import numpy as np
-import spacy
-import string
 import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.base import TransformerMixin
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import f1_score, accuracy_score
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
 from sklearn.neural_network import MLPClassifier
-from tqdm import tqdm
-
-# import spaCy tokenizer (downloaded using $ python -m spacy download en_core_web_sm)
-nlp = spacy.load('en_core_web_sm')
-punctuation = string.punctuation
-
-
-def spacy_tokenizer(sentence):
-    # Tokenize sentence using spaCy
-    tokens = nlp(sentence)
-
-    # Lemmatize tokens
-    tokens = [word.lemma_.lower().strip() if word.lemma_ != '-PRON-' else word.lower_ for word in tokens]
-
-    # Remove punctuation
-    tokens = [word for word in tokens if word not in punctuation]
-
-    return tokens
+from sklearn.neighbors import KNeighborsClassifier
+from utils_tokenizer import spacy_tokenizer
 
 
 def clean_text(text):
@@ -57,40 +39,69 @@ class Predictor(TransformerMixin):
         return {}
 
 
+# Load training data
 df_train = pd.read_csv("data/sentiment_train.csv")
 
-# print(df_train.info())
-# print(df_train.head())
-
+# Separate labels from features
 X_train = df_train['Sentence']
 y_train = df_train['Polarity']
 
+# Load testing data
 df_test = pd.read_csv("data/sentiment_test.csv")
 
-# print(df_test.info())
-# print(df_test.head())
-
+# Separate labels from features
 X_test = df_test['Sentence']
 y_test = df_test['Polarity']
 
-bow_vector = CountVectorizer(tokenizer=spacy_tokenizer, ngram_range=(1, 1))
-tfidf_vector = TfidfVectorizer(tokenizer=spacy_tokenizer)
+# Initialize vectorizers
+vectorizers = [None] * 2
+vectorizers[0] = CountVectorizer(tokenizer=spacy_tokenizer, ngram_range=(1, 3))
+vectorizers[1] = TfidfVectorizer(tokenizer=spacy_tokenizer, max_df=0.5, min_df=0.05, max_features=2000,
+                                 ngram_range=(1, 3))
 
-# classifier = LogisticRegression()
-# classifier = RandomForestClassifier()
-classifier = MLPClassifier(hidden_layer_sizes=(50, 50), solver='adam', random_state=42, early_stopping=True,
-                           verbose=True)
+# Initialize classifiers
+classifiers = [None] * 6
+classifiers[0] = LogisticRegression(random_state=42, n_jobs=-1)
+classifiers[1] = RandomForestClassifier(random_state=42, n_jobs=-1)
+classifiers[2] = KNeighborsClassifier(n_jobs=-1)
+classifiers[3] = AdaBoostClassifier(random_state=42)
+classifiers[4] = GradientBoostingClassifier(random_state=42)
+classifiers[5] = MLPClassifier(hidden_layer_sizes=(200, 200, 100, 50), solver='adam', random_state=42,
+                               early_stopping=True, alpha=0.01)
 
+# Run all classifiers and report results
+# for classifier in classifiers:
+#     for vectorizer in vectorizers:
+#         # Instantiate the pipeline
+#         pipe = Pipeline([('cleaner', Predictor()),
+#                          ('vectorizer', vectorizer),
+#                          ('classifier', classifier)])
+#
+#         # Fit the pipeline
+#         pipe.fit(X_train, y_train)
+#
+#         # Make some predictions on the test set
+#         df_test['Pred'] = pipe.predict(X_test)
+#
+#         # Print f1 score for a threshold of 0
+#         f1 = f1_score(y_test, df_test['Pred'])
+#         accuracy = accuracy_score(y_test, df_test['Pred'])
+#         print(type(classifier))
+#         print(type(vectorizer))
+#         print(f'f1 score @ threshold of 0: {f1:.3f}')
+#         print(f'accuracy @ threshold of 0: {accuracy:.3f}\n')
+
+# Export rows 5 examples of incorrect answers
+# Setup best model
 pipe = Pipeline([('cleaner', Predictor()),
-                ('vectorizer', bow_vector),
-                ('classifier', classifier)])
+                 ('vectorizer', vectorizers[0]),
+                 ('classifier', classifiers[5])])
 
+# Fit best model
 pipe.fit(X_train, y_train)
 
+# Make predictions
 df_test['Pred'] = pipe.predict(X_test)
 
-# Print f1 score for a threshold of 0
-f1 = f1_score(y_test, df_test['Pred'])
-accuracy = accuracy_score(y_test, df_test['Pred'])
-print(f'f1 score @ threshold of 0: {f1:.3f}')
-print(f'accuracy @ threshold of 0: {accuracy:.3f}')
+# Save a dataframe that contains the incorrect predictions
+df_test[df_test['Polarity'] != df_test['Pred']].to_csv('incorrect_classification_q2.csv')

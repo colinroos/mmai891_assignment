@@ -32,3 +32,7 @@ tqdm==4.46.0
 urllib3==1.25.9
 wasabi==0.6.0
 zipp==3.1.0
+
+unidecode~=1.1.1
+autokeras~=1.0.2
+tensorflow-gpu~=2.1.0
