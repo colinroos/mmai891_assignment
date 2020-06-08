@@ -42,7 +42,7 @@ y_train_clean = np.array(y_train)
 y_test_clean = np.array(y_test)
 
 # Fit the autokeras classifier
-classifier.fit(X_train_clean, y_train_clean, epochs=5)
+classifier.fit(X_train_clean, y_train_clean, epochs=10)
 
 # Extract the best model from search function.
 # Note that due to some bugs in autokeras, the best model needs to be extracted by pausing execution using debug mode
