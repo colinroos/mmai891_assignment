@@ -5,8 +5,13 @@ import string
 
 # import spaCy tokenizer (downloaded using $ python -m spacy download en_core_web_sm)
 nlp = spacy.load('en_core_web_sm')
+# nlp = spacy.load('en_core_web_lg')
 punctuation = string.punctuation
 custom_punctuation = ['', '..', '...', '....', '.....', '......']
+custom_stop_words = ['be', 'to', 'I', 'the', 'a', 'i', 'my', 'and', 'you', 'have', 'it', 'in',
+                     'for', 'go', 'of', 'so', 'get', 'me', 'that', 'on', 'do', 'day', 'just',
+                     'but', 'with', 'at', 'all', 'this', 'now', 'work', 'i`m', 'see', 'too',
+                     'I`m', 'it`s', 'today']
 
 
 def spacy_tokenizer(sentence):
@@ -30,12 +35,16 @@ def spacy_tokenizer(sentence):
     tokens = [word for word in tokens if word.text not in punctuation and word.text not in custom_punctuation]
 
     # Remove stop words, DON'T USE, not beneficial in this use case
-    # tokens = [word for word in tokens if word.text not in STOP_WORDS]
+    tokens = [word for word in tokens if word.text not in custom_stop_words]
 
     # Lemmatize tokens
-    tokens = [word.lemma_.lower().strip() if word.lemma_ != '-PRON-' else word.lower_ for word in tokens]
+    tokens = [word.lemma_.strip() if word.lemma_ != '-PRON-' else word.text for word in tokens]
+
+    # Remove empty tokens
+    tokens = [word for word in tokens if word != '']
 
     return tokens
+
 
 def spacy_tokenizer_string(sentence):
     """

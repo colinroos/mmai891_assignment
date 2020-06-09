@@ -17,14 +17,18 @@ import autokeras as ak
 from utils_tokenizer import spacy_tokenizer_string
 
 # Load Training data
+print('Reading train set...', end='')
 df_train = pd.read_csv("data/sentiment_train.csv")
+print('Done.')
 
 # Separate labels and features
 X_train = df_train['Sentence']
 y_train = df_train['Polarity']
 
 # Load Testing data
+print('Reading test set...', end='')
 df_test = pd.read_csv("data/sentiment_test.csv")
+print('Done.')
 
 # Separate labels and features
 X_test = df_test['Sentence']
@@ -42,7 +46,7 @@ y_train_clean = np.array(y_train)
 y_test_clean = np.array(y_test)
 
 # Fit the autokeras classifier
-classifier.fit(X_train_clean, y_train_clean, epochs=10)
+classifier.fit(X_train_clean, y_train_clean, epochs=5)
 
 # Extract the best model from search function.
 # Note that due to some bugs in autokeras, the best model needs to be extracted by pausing execution using debug mode
