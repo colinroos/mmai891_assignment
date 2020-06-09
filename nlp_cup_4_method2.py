@@ -20,6 +20,7 @@ import pkg_resources
 def vader_sentiment_predict(X):
     # Add a column to the DataFrame to store predicted sentiment polarity
     X['Pred'] = 0
+    X['Pred_polarity'] = 0
 
     analyzer = SentimentIntensityAnalyzer()
     sym_spell = SymSpell(2, 7)
@@ -40,13 +41,24 @@ def vader_sentiment_predict(X):
 
     for idx, row in tqdm(X.iterrows(), total=X.shape[0]):
         text = sym_spell.lookup_compound(row['text'], 2)
-        vs = analyzer.polarity_scores(text[0].term)
+        scores = analyzer.polarity_scores(text[0].term)
+        # scores = analyzer.polarity_scores(row['text'])
 
-        X.iloc[idx, 2] = vs['compound']
+        X.iloc[idx, 2] = scores['compound']
+
+        if scores['neu'] >= 0.95:
+            polarity = 1
+        else:
+            if scores['compound'] >= 0.3:
+                polarity = 1
+            else:
+                polarity = 0
+
+        X.iloc[idx, 3] = polarity
 
     # Round polarity score using compounded measure
-    X.loc[X['Pred'] >= 0.2, 'Pred_polarity'] = 1
-    X.loc[X['Pred'] < 0.2, 'Pred_polarity'] = 0
+    # X.loc[X['Pred'] >= 0.2, 'Pred_polarity'] = 1
+    # X.loc[X['Pred'] < 0.2, 'Pred_polarity'] = 0
     X['Pred_polarity'] = X['Pred_polarity'].astype(int)
 
     return X

@@ -25,6 +25,10 @@ from collections import Counter
 def SentimentAnalyzerEvaluate(X):
     # Add a column to the DataFrame to store predicted sentiment polarity
     X['Pred'] = 0
+    X['neg'] = 0
+    X['neu'] = 0
+    X['pos'] = 0
+    X['Pred_polarity'] = 0
 
     # import spaCy tokenizer (downloaded using $ python -m spacy download en_core_web_sm)
     nlp = spacy.load('en_core_web_sm')
@@ -41,6 +45,19 @@ def SentimentAnalyzerEvaluate(X):
 
         # Add sentence sentiment to DataFrame
         X.iloc[idx, 3] = scores['compound']
+        X.iloc[idx, 4] = scores['neg']
+        X.iloc[idx, 5] = scores['neu']
+        X.iloc[idx, 6] = scores['pos']
+
+        if scores['neu'] >= 0.95:
+            polarity = 1
+        else:
+            if scores['compound'] >= 0.3:
+                polarity = 1
+            else:
+                polarity = 0
+
+        X.iloc[idx, 7] = polarity
 
         # if idx > 500:
         #     break
@@ -50,20 +67,20 @@ def SentimentAnalyzerEvaluate(X):
     accuracies = []
     thresholds = np.linspace(-1, 1, 50)
 
-    for threshold in thresholds:
-        # Round polarity score using compounded measure
-        X.loc[X['Pred'] >= threshold, 'Pred_polarity'] = 1
-        X.loc[X['Pred'] < threshold, 'Pred_polarity'] = 0
-
-        # Calculate f1 score for the threshold
-        f1_scores.append(f1_score(X['sentiment'], X['Pred_polarity']))
-        accuracies.append(accuracy_score(X['sentiment'], X['Pred_polarity']))
+    # for threshold in thresholds:
+    #     # Round polarity score using compounded measure
+    #     X.loc[X['Pred'] >= threshold, 'Pred_polarity'] = 1
+    #     X.loc[X['Pred'] < threshold, 'Pred_polarity'] = 0
+    #
+    #     # Calculate f1 score for the threshold
+    #     f1_scores.append(f1_score(X['sentiment'], X['Pred_polarity']))
+    #     accuracies.append(accuracy_score(X['sentiment'], X['Pred_polarity']))
 
     # Round polarity score using compounded measure
-    X.loc[X['Pred'] >= 0.3, 'Pred_polarity'] = 1
-    X.loc[X['Pred'] < 0.3, 'Pred_polarity'] = 0
+    # X.loc[X['Pred'] >= 0.3, 'Pred_polarity'] = 1
+    # X.loc[X['Pred'] < 0.3, 'Pred_polarity'] = 0
 
-    X[X['sentiment'] != X['Pred_polarity']].to_csv('incorrect_classification_nlp.csv')
+    # X[X['sentiment'] != X['Pred_polarity']].to_csv('incorrect_classification_nlp.csv')
 
     # Print f1 score for a threshold of 0
     f1 = f1_score(X['sentiment'], X['Pred_polarity'])
@@ -71,13 +88,13 @@ def SentimentAnalyzerEvaluate(X):
     print(f'f1 score @ threshold of 0: {f1:.3f}')
     print(f'accuracy @ threshold of 0: {accuracy:.3f}')
 
-    plt.plot(thresholds, f1_scores)
-    plt.plot(thresholds, accuracies, color='r')
-    plt.legend(['F1 Score', 'Accuracy'], loc='lower left')
-    plt.xlabel('Threshold')
-    plt.ylabel('Score')
-    plt.title('F1 and Accuracy Score by Threshold Value')
-    plt.show()
+    # plt.plot(thresholds, f1_scores)
+    # plt.plot(thresholds, accuracies, color='r')
+    # plt.legend(['F1 Score', 'Accuracy'], loc='lower left')
+    # plt.xlabel('Threshold')
+    # plt.ylabel('Score')
+    # plt.title('F1 and Accuracy Score by Threshold Value')
+    # plt.show()
 
     return X
 
