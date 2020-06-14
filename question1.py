@@ -68,16 +68,17 @@ for threshold in thresholds:
     accuracies.append(accuracy_score(df_test['Polarity'], df_test['Pred_polarity']))
 
 # Round polarity score using compounded measure
-df_test.loc[df_test['Pred'] >= 0, 'Pred_polarity'] = 1
-df_test.loc[df_test['Pred'] < 0, 'Pred_polarity'] = 0
+threshold = thresholds[np.argmax(f1_scores)]
+df_test.loc[df_test['Pred'] >= threshold, 'Pred_polarity'] = 1
+df_test.loc[df_test['Pred'] < threshold, 'Pred_polarity'] = 0
 
 df_test[df_test['Polarity'] != df_test['Pred_polarity']].to_csv('incorrect_classification_q1.csv')
 
 # Print f1 score for a threshold of 0
 f1 = f1_score(df_test['Polarity'], df_test['Pred_polarity'])
 accuracy = accuracy_score(df_test['Polarity'], df_test['Pred_polarity'])
-print(f'f1 score @ threshold of 0: {f1:.3f}')
-print(f'accuracy @ threshold of 0: {accuracy:.3f}')
+print(f'f1 score @ threshold of {threshold:.3f}: {f1:.3f}')
+print(f'accuracy @ threshold of {threshold:.3f}: {accuracy:.3f}')
 
 plt.plot(thresholds, f1_scores)
 plt.plot(thresholds, accuracies, color='r')

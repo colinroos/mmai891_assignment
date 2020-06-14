@@ -35,7 +35,7 @@ def spacy_tokenizer(sentence):
     tokens = [word for word in tokens if word.text not in punctuation and word.text not in custom_punctuation]
 
     # Remove stop words, DON'T USE, not beneficial in this use case
-    tokens = [word for word in tokens if word.text not in custom_stop_words]
+    # tokens = [word for word in tokens if word.text not in custom_stop_words]
 
     # Lemmatize tokens
     tokens = [word.lemma_.strip() if word.lemma_ != '-PRON-' else word.text for word in tokens]
@@ -70,6 +70,6 @@ def spacy_tokenizer_string(sentence):
     # tokens = [word for word in tokens if word.text not in STOP_WORDS]
 
     # Lemmatize tokens
-    tokens = [word.lemma_.lower().strip() if word.lemma_ != '-PRON-' else word.lower_ for word in tokens]
+    tokens = [word.lemma_.strip() if word.lemma_ != '-PRON-' else word.text for word in tokens]
 
     return ' '.join(tokens)
