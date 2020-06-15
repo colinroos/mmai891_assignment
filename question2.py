@@ -47,9 +47,7 @@ classifiers = [LogisticRegression(random_state=42, n_jobs=-1),
                AdaBoostClassifier(random_state=42),
                GradientBoostingClassifier(random_state=42),
                MLPClassifier(hidden_layer_sizes=(200, 200, 100, 50), solver='adam', random_state=42,
-                             early_stopping=True, alpha=0.01),
-               BernoulliNB(),
-               GaussianNB()]
+                             early_stopping=True, alpha=0.01)]
 
 # Run all classifiers and report results
 for classifier in classifiers:
