@@ -14,38 +14,6 @@ custom_stop_words = ['be', 'to', 'I', 'the', 'a', 'i', 'my', 'and', 'you', 'have
                      'I`m', 'it`s', 'today']
 
 
-def spacy_tokenizer(sentence):
-    """
-    Tokenizer and pre-processing using spaCy
-    :param sentence: input sentence
-    :type sentence: string
-    :return: list of tokens
-    """
-
-    # Remove digits
-    sentence = re.sub(r'\d+', '', sentence)
-
-    # Remove unicode characters
-    sentence = unidecode.unidecode(sentence)
-
-    # Tokenize sentence using spaCy
-    tokens = nlp(sentence)
-
-    # Remove punctuation
-    tokens = [word for word in tokens if word.text not in punctuation and word.text not in custom_punctuation]
-
-    # Remove stop words, DON'T USE, not beneficial in this use case
-    # tokens = [word for word in tokens if word.text not in custom_stop_words]
-
-    # Lemmatize tokens
-    tokens = [word.lemma_.strip() if word.lemma_ != '-PRON-' else word.text for word in tokens]
-
-    # Remove empty tokens
-    tokens = [word for word in tokens if word != '']
-
-    return tokens
-
-
 def spacy_tokenizer_string(sentence):
     """
     Tokenizer and pre-processing using spaCy

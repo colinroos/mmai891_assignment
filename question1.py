@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from sklearn.metrics import f1_score, accuracy_score
 from tqdm import tqdm
-from utils_tokenizer import spacy_tokenizer
+from utils_tokenizer import spacy_tokenizer_string
 
 # Load training data
 df_train = pd.read_csv("data/sentiment_train.csv")
@@ -45,10 +45,10 @@ sia = SentimentIntensityAnalyzer()
 # Calculate sentiment for each sentence in test set
 for idx, row in tqdm(df_test.iterrows(), total=df_test.shape[0]):
     # Tokenize sentence using spaCy
-    tokens = spacy_tokenizer(row['Sentence'])
+    tokens = spacy_tokenizer_string(row['Sentence'])
 
     # Get polarity score from vader
-    scores = sia.polarity_scores(' '.join(tokens))
+    scores = sia.polarity_scores(tokens)
 
     # Add sentence sentiment to DataFrame
     df_test.iloc[idx, 2] = scores['compound']
